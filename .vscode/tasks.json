@@ -2,9 +2,99 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Resize Images to 24px (Enhanced)",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Resize Images to 24px",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px.py"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Generate 24px Composite Image",
+			"type": "shell",
+			"command": "python",
+			"args": ["image_rectangle.py", "images/24px", "5"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Resize and Generate 24px Composite",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"Resize Images to 24px",
+				"Generate 24px Composite Image"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
 			"label": "Resize Images to 24px",
 			"type": "shell",
 			"command": "python resize_to_24px.py",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Resize Images to 24px (Enhanced)",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Resize Images to 24px (Enhanced Basic)",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--basic"],
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build",
@@ -90,6 +180,54 @@
 			"id": "scaleFactor",
 			"description": "Scale factor for the image",
 			"default": "5",
+			"type": "promptString"
+		},
+		{
+			"id": "contrast",
+			"description": "Contrast multiplier (1.0 = no change, >1.0 = more contrast)",
+			"default": "1.2",
+			"type": "promptString"
+		},
+		{
+			"id": "saturation",
+			"description": "Saturation multiplier (1.0 = no change, >1.0 = more saturated)",
+			"default": "1.3",
+			"type": "promptString"
+		},
+		{
+			"id": "brightness",
+			"description": "Brightness multiplier (1.0 = no change, >1.0 = brighter)",
+			"default": "1.05",
+			"type": "promptString"
+		},
+		{
+			"id": "sharpness",
+			"description": "Sharpness multiplier (1.0 = no change, >1.0 = sharper)",
+			"default": "1.1",
+			"type": "promptString"
+		},
+		{
+			"id": "gamma",
+			"description": "Gamma correction (<1.0 brightens mid-tones, >1.0 darkens them)",
+			"default": "0.85",
+			"type": "promptString"
+		},
+		{
+			"id": "unsharpRadius",
+			"description": "Unsharp mask radius (blur radius for edge detection)",
+			"default": "0.8",
+			"type": "promptString"
+		},
+		{
+			"id": "unsharpPercent",
+			"description": "Unsharp mask strength percentage (100 = normal, >100 = stronger)",
+			"default": "120",
+			"type": "promptString"
+		},
+		{
+			"id": "unsharpThreshold",
+			"description": "Unsharp mask threshold (minimum difference to apply sharpening)",
+			"default": "2",
 			"type": "promptString"
 		}
 	]

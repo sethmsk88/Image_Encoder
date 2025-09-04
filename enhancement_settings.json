@@ -1,0 +1,28 @@
+{
+  "enhancement_settings": {
+    "contrast": 1.2,
+    "saturation": 1.7,
+    "brightness": 1.05,
+    "sharpness": 1.1,
+    "gamma": 1.00,
+    "unsharp_mask": {
+      "enabled": true,
+      "radius": 0.8,
+      "percent": 120,
+      "threshold": 2
+    }
+  },
+  "description": {
+    "contrast": "Contrast multiplier (1.0 = no change, >1.0 = more contrast)",
+    "saturation": "Saturation multiplier (1.0 = no change, >1.0 = more saturated)", 
+    "brightness": "Brightness multiplier (1.0 = no change, >1.0 = brighter)",
+    "sharpness": "Sharpness multiplier (1.0 = no change, >1.0 = sharper)",
+    "gamma": "Gamma correction (<1.0 brightens mid-tones, >1.0 darkens them)",
+    "unsharp_mask": {
+      "enabled": "Whether to apply unsharp masking",
+      "radius": "Blur radius for edge detection",
+      "percent": "Sharpening strength percentage (100 = normal, >100 = stronger)",
+      "threshold": "Minimum difference to apply sharpening"
+    }
+  }
+}

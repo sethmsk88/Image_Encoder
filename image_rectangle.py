@@ -4,6 +4,46 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import os
 import glob
+from datetime import datetime
+
+def create_directory_if_not_exists(directory):
+    """Create directory if it doesn't exist"""
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Created directory: {directory}")
+
+def get_unique_filename(filepath):
+    """
+    Generate a unique filename by adding timestamp if file already exists
+    
+    Args:
+        filepath: Original file path
+        
+    Returns:
+        str: Unique file path that doesn't exist yet
+    """
+    if not os.path.exists(filepath):
+        return filepath
+    
+    # File exists, add timestamp
+    directory = os.path.dirname(filepath)
+    filename = os.path.basename(filepath)
+    name, ext = os.path.splitext(filename)
+    
+    # Generate timestamp string (time only, no date)
+    timestamp = datetime.now().strftime("%H%M%S")
+    
+    # Create new filename with timestamp
+    new_filename = f"{name}_{timestamp}{ext}"
+    new_filepath = os.path.join(directory, new_filename)
+    
+    # If somehow this still exists (unlikely), add milliseconds
+    if os.path.exists(new_filepath):
+        timestamp_ms = datetime.now().strftime("%H%M%S_%f")[:-3]  # Remove last 3 digits for milliseconds
+        new_filename = f"{name}_{timestamp_ms}{ext}"
+        new_filepath = os.path.join(directory, new_filename)
+    
+    return new_filepath
 
 def create_single_rectangle_image(data_file: str, scale_factor: int = 5):
     """Create a single rectangle image from a .dat file and return the PIL Image object"""
@@ -79,9 +119,15 @@ def create_led_rectangle_image(data_file: str, output_file: str, scale_factor: i
     """Create a single rectangle image and save it - legacy function for single file processing"""
     rect_img = create_single_rectangle_image(data_file, scale_factor)
     
-    # Save image
-    rect_img.save(output_file)
-    print(f"Rectangle image saved to {output_file} (scaled {scale_factor}x, size: {rect_img.size[0]}x{rect_img.size[1]})")
+    # Save image with unique filename
+    unique_output_file = get_unique_filename(output_file)
+    rect_img.save(unique_output_file)
+    
+    if unique_output_file != output_file:
+        print(f"File already existed, saved with timestamp: {unique_output_file}")
+        print(f"Rectangle image saved (scaled {scale_factor}x, size: {rect_img.size[0]}x{rect_img.size[1]})")
+    else:
+        print(f"Rectangle image saved to {unique_output_file} (scaled {scale_factor}x, size: {rect_img.size[0]}x{rect_img.size[1]})")
 
 def find_dat_files_grouped(directory):
     """Find all .dat files grouped by subdirectory"""
@@ -379,9 +425,15 @@ def create_composite_image(directory: str, output_file: str, scale_factor: int =
         
         # y_offset is now correctly positioned for the next section
     
-    # Save composite
-    composite.save(output_file)
-    print(f"Composite image saved to {output_file}")
+    # Save composite with unique filename
+    unique_output_file = get_unique_filename(output_file)
+    composite.save(unique_output_file)
+    
+    if unique_output_file != output_file:
+        print(f"File already existed, saved with timestamp: {unique_output_file}")
+    else:
+        print(f"Composite image saved to {unique_output_file}")
+    
     print(f"Final size: {composite.size[0]}x{composite.size[1]} pixels")
     print(f"Total groups: {len(file_groups)}")
     print(f"Total files: {total_files}")
