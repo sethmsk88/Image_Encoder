@@ -11,9 +11,9 @@ for i in range(256):
 	NEW METHOD
 '''
 # img_dir_name = "img"
-img_dir_path = "./images/"
+img_dir_path = "./images_70/"
 # img_data_dir_path = "../"
-img_data_filename = "img_data.h"
+img_data_filename = "img_data_70.h"
 IMG_HEIGHT = 70	# image height is constant
 
 # Get number of image files in directory

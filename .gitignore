@@ -1,2 +1,4 @@
-images/
-image_out/
+*.jpg
+*.png
+*.jpeg
+*.gif
