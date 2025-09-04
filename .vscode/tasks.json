@@ -167,6 +167,115 @@
 				"focus": false,
 				"panel": "shared"
 			}
+		},
+		{
+			"label": "Test All Enhancement Presets",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"Test Enhancement - Subtle",
+				"Test Enhancement - Vibrant", 
+				"Test Enhancement - Sharp",
+				"Test Enhancement - Warm",
+				"Test Enhancement - Dramatic",
+				"Test Enhancement - Soft"
+			],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Test Enhancement - Subtle",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced", "--settings", "enhancement_subtle.json"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Test Enhancement - Vibrant",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced", "--settings", "enhancement_vibrant.json"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Test Enhancement - Sharp",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced", "--settings", "enhancement_sharp.json"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Test Enhancement - Warm",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced", "--settings", "enhancement_warm.json"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Test Enhancement - Dramatic",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced", "--settings", "enhancement_dramatic.json"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Test Enhancement - Soft",
+			"type": "shell",
+			"command": "python",
+			"args": ["resize_to_24px_enhanced.py", "--enhanced", "--settings", "enhancement_soft.json"],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
 		}
 	],
 	"inputs": [

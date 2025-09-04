@@ -1,0 +1,16 @@
+{
+  "enhancement_settings": {
+    "contrast": 1.4,
+    "saturation": 1.8,
+    "brightness": 1.1,
+    "sharpness": 1.3,
+    "gamma": 0.8,
+    "unsharp_mask": {
+      "enabled": true,
+      "radius": 1.0,
+      "percent": 150,
+      "threshold": 1
+    }
+  },
+  "description": "Vibrant enhancement - Bold colors and high contrast for eye-catching results"
+}

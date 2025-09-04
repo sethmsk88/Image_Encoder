@@ -1,0 +1,16 @@
+{
+  "enhancement_settings": {
+    "contrast": 1.15,
+    "saturation": 1.4,
+    "brightness": 1.15,
+    "sharpness": 1.1,
+    "gamma": 0.75,
+    "unsharp_mask": {
+      "enabled": true,
+      "radius": 0.7,
+      "percent": 130,
+      "threshold": 2
+    }
+  },
+  "description": "Warm & bright - Lightens images with warm, inviting tones"
+}

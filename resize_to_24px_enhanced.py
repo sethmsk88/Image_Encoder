@@ -54,7 +54,7 @@ def load_enhancement_settings(settings_file="enhancement_settings.json"):
         settings_file: Path to the JSON settings file
         
     Returns:
-        dict: Enhancement settings dictionary
+        tuple: (settings_dict, preset_name) where preset_name is extracted from filename
     """
     try:
         if os.path.exists(settings_file):
@@ -62,14 +62,23 @@ def load_enhancement_settings(settings_file="enhancement_settings.json"):
                 data = json.load(f)
                 settings = data.get('enhancement_settings', {})
                 print(f"Loaded enhancement settings from '{settings_file}'")
-                return settings
+                
+                # Extract preset name from filename
+                filename = os.path.basename(settings_file)
+                if filename.startswith('enhancement_') and filename.endswith('.json'):
+                    # Extract the preset name (e.g., "dramatic" from "enhancement_dramatic.json")
+                    preset_name = filename[12:-5]  # Remove "enhancement_" prefix and ".json" suffix
+                else:
+                    preset_name = None
+                
+                return settings, preset_name
         else:
             print(f"Settings file '{settings_file}' not found. Using default values.")
-            return {}
+            return {}, None
     except Exception as e:
         print(f"Error reading settings file '{settings_file}': {e}")
         print("Using default values.")
-        return {}
+        return {}, None
 
 def enhance_image_quality(img, enhance_contrast=1.2, enhance_saturation=1.3, enhance_sharpness=1.1, enhance_brightness=1.05):
     """
@@ -181,7 +190,7 @@ def resize_images_to_24px_enhanced(settings_file="enhancement_settings.json"):
     target_height = 24
     
     # Load enhancement settings from file
-    file_settings = load_enhancement_settings(settings_file)
+    file_settings, preset_name = load_enhancement_settings(settings_file)
     
     # Enhancement settings with defaults
     settings = {
@@ -280,7 +289,13 @@ def resize_images_to_24px_enhanced(settings_file="enhancement_settings.json"):
             # Generate output filename (flatten subdirectory structure)
             filename = os.path.basename(rel_path)
             name, ext = os.path.splitext(filename)
-            output_filename = f"{name}_24px{ext}"
+            
+            # Include preset name in filename if available
+            if preset_name:
+                output_filename = f"{name}_24px_{preset_name}{ext}"
+            else:
+                output_filename = f"{name}_24px{ext}"
+            
             output_path = os.path.join(output_dir, output_filename)
             
             # Get unique output path to prevent overwriting

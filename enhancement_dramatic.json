@@ -1,0 +1,16 @@
+{
+  "enhancement_settings": {
+    "contrast": 1.6,
+    "saturation": 1.3,
+    "brightness": 0.95,
+    "sharpness": 1.2,
+    "gamma": 1.1,
+    "unsharp_mask": {
+      "enabled": true,
+      "radius": 0.9,
+      "percent": 140,
+      "threshold": 2
+    }
+  },
+  "description": "High contrast drama - Dark shadows and bright highlights for dramatic effect"
+}

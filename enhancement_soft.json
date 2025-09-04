@@ -1,0 +1,16 @@
+{
+  "enhancement_settings": {
+    "contrast": 1.05,
+    "saturation": 1.15,
+    "brightness": 1.08,
+    "sharpness": 0.95,
+    "gamma": 0.85,
+    "unsharp_mask": {
+      "enabled": false,
+      "radius": 0.5,
+      "percent": 100,
+      "threshold": 4
+    }
+  },
+  "description": "Soft & natural - Minimal processing for a gentle, organic look"
+}
