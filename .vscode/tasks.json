@@ -1,0 +1,96 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Resize Images to 24px",
+			"type": "shell",
+			"command": "python resize_to_24px.py",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Create Thumbnails (36px)",
+			"type": "shell",
+			"command": "python create_thumbnail.py",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Encode Images (70px)",
+			"type": "shell",
+			"command": "python image_encoder.py",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Full Image Processing Pipeline",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"Resize Images to 24px",
+				"Create Thumbnails (36px)",
+				"Encode Images (70px)"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Run Image Rectangle Generator - Custom",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"image_rectangle.py",
+				"${input:dataFile}",
+				"${input:scaleFactor}"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		}
+	],
+	"inputs": [
+		{
+			"id": "dataFile",
+			"description": "Path to the image file or directory containing images(e.g. images/24px)",
+			"default": "images/24px",
+			"type": "promptString"
+		},
+		{
+			"id": "scaleFactor",
+			"description": "Scale factor for the image",
+			"default": "5",
+			"type": "promptString"
+		}
+	]
+}
