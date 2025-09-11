@@ -5,6 +5,10 @@ from datetime import datetime
 import PIL.Image as Image
 from PIL import ImageEnhance
 
+# Get the project root directory (parent of src)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
 def create_directory_if_not_exists(directory):
     """Create directory if it doesn't exist"""
     if not os.path.exists(directory):
@@ -74,14 +78,14 @@ def enhance_small_image(img, contrast_boost=1.15, saturation_boost=1.2, brightne
 def resize_images_to_24px(enable_enhancement=True):
     """
     Resize all images in images/originals to 24 pixels tall
-    and save them to images/24px directory
+    and save them to images/processed/24px directory
     
     Args:
         enable_enhancement: Whether to apply image enhancements (default: True)
     """
-    # Define directories
-    source_dir = "images/originals"
-    output_dir = "images/24px"
+    # Define directories relative to project root
+    source_dir = os.path.join(PROJECT_ROOT, "images", "originals")
+    output_dir = os.path.join(PROJECT_ROOT, "images", "processed", "24px")
     target_height = 24
     
     # Check if source directory exists

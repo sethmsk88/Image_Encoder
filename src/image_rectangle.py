@@ -6,6 +6,10 @@ import os
 import glob
 from datetime import datetime
 
+# Get the project root directory (parent of src)  
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
 def create_directory_if_not_exists(directory):
     """Create directory if it doesn't exist"""
     if not os.path.exists(directory):
@@ -444,7 +448,7 @@ if __name__ == "__main__":
         print("Usage: python image_rectangle.py <data_file_or_directory> [scale_factor]")
         print("  For single .dat file: python image_rectangle.py file.dat [scale_factor]")
         print("  For .dat directory:   python image_rectangle.py img_data/ [scale_factor]")
-        print("  For image directory:  python image_rectangle.py images/24px/ [scale_factor]")
+        print("  For image directory:  python src/image_rectangle.py images/processed/24px/ [scale_factor]")
         print("  ")
         print("Supports:")
         print("  - .dat files (LED data format)")
@@ -462,8 +466,8 @@ if __name__ == "__main__":
     # Check if input is a directory or file
     if os.path.isdir(input_path):
         # Directory mode - create composite image
-        # Create images/composites directory for composite output images
-        composites_dir = "images/composites"
+        # Create composites directory for composite output images
+        composites_dir = os.path.join(PROJECT_ROOT, "images", "composites")
         os.makedirs(composites_dir, exist_ok=True)
         
         dir_name = os.path.basename(os.path.normpath(input_path))

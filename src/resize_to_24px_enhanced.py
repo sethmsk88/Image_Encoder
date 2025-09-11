@@ -5,6 +5,10 @@ import argparse
 from datetime import datetime
 import PIL.Image as Image
 from PIL import ImageEnhance, ImageFilter
+
+# Get the project root directory (parent of src)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 import numpy as np
 
 def create_directory_if_not_exists(directory):
@@ -46,7 +50,7 @@ def get_unique_filename(filepath):
     
     return new_filepath
 
-def load_enhancement_settings(settings_file="enhancement_settings.json"):
+def load_enhancement_settings(settings_file=None):
     """
     Load enhancement settings from JSON file
     
@@ -56,6 +60,12 @@ def load_enhancement_settings(settings_file="enhancement_settings.json"):
     Returns:
         tuple: (settings_dict, preset_name) where preset_name is extracted from filename
     """
+    if settings_file is None:
+        settings_file = os.path.join(PROJECT_ROOT, "config", "enhancement_settings.json")
+    else:
+        # If relative path provided, make it relative to project root
+        if not os.path.isabs(settings_file):
+            settings_file = os.path.join(PROJECT_ROOT, settings_file)
     try:
         if os.path.exists(settings_file):
             with open(settings_file, 'r') as f:
@@ -176,17 +186,17 @@ def apply_unsharp_mask(img, radius=1.0, percent=150, threshold=3):
     
     return Image.fromarray(sharpened)
 
-def resize_images_to_24px_enhanced(settings_file="enhancement_settings.json"):
+def resize_images_to_24px_enhanced(settings_file=None):
     """
     Resize all images in images/originals to 24 pixels tall with quality enhancements
-    and save them to images/24px directory
+    and save them to images/processed/24px directory
     
     Args:
         settings_file: Path to the JSON file containing enhancement settings
     """
-    # Define directories
-    source_dir = "images/originals"
-    output_dir = "images/24px"
+    # Define directories relative to project root
+    source_dir = os.path.join(PROJECT_ROOT, "images", "originals")
+    output_dir = os.path.join(PROJECT_ROOT, "images", "processed", "24px")
     target_height = 24
     
     # Load enhancement settings from file
@@ -328,9 +338,9 @@ def resize_images_to_24px_basic():
     """
     Original basic resize function without enhancements (for comparison)
     """
-    # Define directories
-    source_dir = "images/originals"
-    output_dir = "images/24px"
+    # Define directories relative to project root
+    source_dir = os.path.join(PROJECT_ROOT, "images", "originals")
+    output_dir = os.path.join(PROJECT_ROOT, "images", "processed", "24px")
     target_height = 24
     
     # Check if source directory exists
@@ -426,7 +436,7 @@ Examples:
   python resize_to_24px_enhanced.py --basic              # Basic processing
   python resize_to_24px_enhanced.py --settings custom.json  # Use custom settings file
 
-Enhancement settings are loaded from 'enhancement_settings.json'.
+Enhancement settings are loaded from 'config/enhancement_settings.json'.
 Edit this file to customize enhancement parameters.
         """
     )
@@ -436,7 +446,7 @@ Edit this file to customize enhancement parameters.
     mode_group.add_argument(
         '--enhanced', '-e',
         action='store_true',
-        help='Use enhanced processing mode with settings from enhancement_settings.json'
+        help='Use enhanced processing mode with settings from config/enhancement_settings.json'
     )
     mode_group.add_argument(
         '--basic', '-b',
@@ -453,8 +463,8 @@ Edit this file to customize enhancement parameters.
     # Settings file argument
     parser.add_argument(
         '--settings', '-s',
-        default='enhancement_settings.json',
-        help='Path to JSON settings file (default: enhancement_settings.json)'
+        default=None,
+        help='Path to JSON settings file (default: config/enhancement_settings.json)'
     )
     
     return parser.parse_args()
