@@ -2,3 +2,7 @@
 *.png
 *.jpeg
 *.gif
+
+# Ignore img_data directory contents but keep the directory structure
+img_data/*
+!img_data/.gitkeep
