@@ -186,16 +186,25 @@ def apply_unsharp_mask(img, radius=1.0, percent=150, threshold=3):
     
     return Image.fromarray(sharpened)
 
-def resize_images_to_24px_enhanced(settings_file=None):
+def resize_images_to_24px_enhanced(settings_file=None, input_dir=None):
     """
-    Resize all images in images/originals to 24 pixels tall with quality enhancements
+    Resize all images in specified directory to 24 pixels tall with quality enhancements
     and save them to images/processed/24px directory
     
     Args:
         settings_file: Path to the JSON file containing enhancement settings
+        input_dir: Path to the directory containing source images (default: images/originals)
     """
     # Define directories relative to project root
-    source_dir = os.path.join(PROJECT_ROOT, "images", "originals")
+    if input_dir is None:
+        source_dir = os.path.join(PROJECT_ROOT, "images", "originals")
+    else:
+        # If relative path provided, make it relative to project root
+        if not os.path.isabs(input_dir):
+            source_dir = os.path.join(PROJECT_ROOT, input_dir)
+        else:
+            source_dir = input_dir
+    
     output_dir = os.path.join(PROJECT_ROOT, "images", "processed", "24px")
     target_height = 24
     
@@ -334,12 +343,23 @@ def resize_images_to_24px_enhanced(settings_file=None):
     
     return processed_count > 0
 
-def resize_images_to_24px_basic():
+def resize_images_to_24px_basic(input_dir=None):
     """
     Original basic resize function without enhancements (for comparison)
+    
+    Args:
+        input_dir: Path to the directory containing source images (default: images/originals)
     """
     # Define directories relative to project root
-    source_dir = os.path.join(PROJECT_ROOT, "images", "originals")
+    if input_dir is None:
+        source_dir = os.path.join(PROJECT_ROOT, "images", "originals")
+    else:
+        # If relative path provided, make it relative to project root
+        if not os.path.isabs(input_dir):
+            source_dir = os.path.join(PROJECT_ROOT, input_dir)
+        else:
+            source_dir = input_dir
+    
     output_dir = os.path.join(PROJECT_ROOT, "images", "processed", "24px")
     target_height = 24
     
@@ -435,9 +455,11 @@ Examples:
   python resize_to_24px_enhanced.py --enhanced           # Enhanced processing using settings file
   python resize_to_24px_enhanced.py --basic              # Basic processing
   python resize_to_24px_enhanced.py --settings custom.json  # Use custom settings file
+  python resize_to_24px_enhanced.py --enhanced --input my_images/  # Process custom directory
 
 Enhancement settings are loaded from 'config/enhancement_settings.json'.
 Edit this file to customize enhancement parameters.
+Source images are read from 'images/originals' by default.
         """
     )
     
@@ -467,6 +489,13 @@ Edit this file to customize enhancement parameters.
         help='Path to JSON settings file (default: config/enhancement_settings.json)'
     )
     
+    # Input directory argument
+    parser.add_argument(
+        '--input', '--input-dir',
+        default=None,
+        help='Path to directory containing source images (default: images/originals)'
+    )
+    
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -479,10 +508,10 @@ if __name__ == "__main__":
     # Determine processing mode
     if args.enhanced:
         print("\nUsing enhanced processing mode...")
-        success = resize_images_to_24px_enhanced(args.settings)
+        success = resize_images_to_24px_enhanced(args.settings, args.input)
     elif args.basic:
         print("\nUsing basic processing mode...")
-        success = resize_images_to_24px_basic()
+        success = resize_images_to_24px_basic(args.input)
     else:
         # Interactive mode (default when no arguments provided)
         while True:
@@ -490,11 +519,11 @@ if __name__ == "__main__":
             
             if choice == '1':
                 print("\nUsing enhanced processing mode...")
-                success = resize_images_to_24px_enhanced(args.settings)
+                success = resize_images_to_24px_enhanced(args.settings, args.input)
                 break
             elif choice == '2':
                 print("\nUsing basic processing mode...")
-                success = resize_images_to_24px_basic()
+                success = resize_images_to_24px_basic(args.input)
                 break
             else:
                 print("Invalid choice. Please enter 1 or 2.")

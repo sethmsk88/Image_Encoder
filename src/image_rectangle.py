@@ -445,10 +445,14 @@ def create_composite_image(directory: str, output_file: str, scale_factor: int =
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python image_rectangle.py <data_file_or_directory> [scale_factor]")
-        print("  For single .dat file: python image_rectangle.py file.dat [scale_factor]")
-        print("  For .dat directory:   python image_rectangle.py img_data/ [scale_factor]")
-        print("  For image directory:  python src/image_rectangle.py images/processed/24px/ [scale_factor]")
+        print("Usage: python image_rectangle.py <data_file_or_directory> [scale_factor] [max_width]")
+        print("  For single .dat file: python image_rectangle.py file.dat [scale_factor] [max_width]")
+        print("  For .dat directory:   python image_rectangle.py img_data/ [scale_factor] [max_width]")
+        print("  For image directory:  python src/image_rectangle.py images/processed/24px/ [scale_factor] [max_width]")
+        print("  ")
+        print("Parameters:")
+        print("  - scale_factor: Scaling factor for output image (default: 5)")
+        print("  - max_width: Maximum width of composite image in pixels (default: 2000)")
         print("  ")
         print("Supports:")
         print("  - .dat files (LED data format)")
@@ -458,6 +462,7 @@ if __name__ == "__main__":
 
     input_path = sys.argv[1]
     scale_factor = int(sys.argv[2]) if len(sys.argv) > 2 else 5
+    max_width = int(sys.argv[3]) if len(sys.argv) > 3 else 2000
     
     # Create output directory if it doesn't exist
     output_dir = "output_images"
@@ -473,16 +478,17 @@ if __name__ == "__main__":
         dir_name = os.path.basename(os.path.normpath(input_path))
         
         # Detect file type to determine output filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         file_type = detect_file_type(input_path)
         if file_type == 'dat' or file_type == 'mixed':
-            output_file = os.path.join(composites_dir, f"{dir_name}_composite_rectangle.png")
+            output_file = os.path.join(composites_dir, f"{dir_name}_composite_rectangle_{timestamp}.png")
         elif file_type == 'image':
-            output_file = os.path.join(composites_dir, f"{dir_name}_composite_scaled.png")
+            output_file = os.path.join(composites_dir, f"{dir_name}_composite_scaled_{timestamp}.png")
         else:
             print(f"No supported files found in {input_path}")
             sys.exit(1)
         
-        create_composite_image(input_path, output_file, scale_factor)
+        create_composite_image(input_path, output_file, scale_factor, max_width)
     elif os.path.isfile(input_path) and input_path.endswith('.dat'):
         # Single .dat file mode - still uses output_images directory
         base_name = os.path.splitext(os.path.basename(input_path))[0]

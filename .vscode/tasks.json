@@ -5,7 +5,7 @@
 			"label": "Resize Images to 24px (Enhanced)",
 			"type": "shell",
 			"command": "python",
-			"args": ["src/resize_to_24px_enhanced.py", "--enhanced"],
+			"args": ["src/resize_to_24px_enhanced.py", "--enhanced", "--input", "${input:sourceDirectory}"],
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build",
@@ -35,7 +35,7 @@
 			"label": "Generate 24px Composite Image",
 			"type": "shell",
 			"command": "python",
-			"args": ["src/image_rectangle.py", "images/processed/24px", "5"],
+			"args": ["src/image_rectangle.py", "images/processed/24px", "5", "${input:maxWidth}"],
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build",
@@ -65,21 +65,6 @@
 			"label": "Resize Images to 24px",
 			"type": "shell",
 			"command": "python src/resize_to_24px.py",
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build",
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared"
-			}
-		},
-		{
-			"label": "Resize Images to 24px (Enhanced)",
-			"type": "shell",
-			"command": "python",
-			"args": ["src/resize_to_24px_enhanced.py", "--enhanced"],
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build",
@@ -156,7 +141,8 @@
 			"args": [
 				"src/image_rectangle.py",
 				"${input:dataFile}",
-				"${input:scaleFactor}"
+				"${input:scaleFactor}",
+				"${input:maxWidth}"
 			],
 			"isBackground": false,
 			"problemMatcher": [],
@@ -280,6 +266,12 @@
 	],
 	"inputs": [
 		{
+			"id": "sourceDirectory",
+			"description": "Path to directory containing source images",
+			"default": "images/originals",
+			"type": "promptString"
+		},
+		{
 			"id": "dataFile",
 			"description": "Path to the image file or directory containing images(e.g. images/processed/24px)",
 			"default": "images/processed/24px",
@@ -289,6 +281,12 @@
 			"id": "scaleFactor",
 			"description": "Scale factor for the image",
 			"default": "5",
+			"type": "promptString"
+		},
+		{
+			"id": "maxWidth",
+			"description": "Maximum width of composite image in pixels",
+			"default": "1200",
 			"type": "promptString"
 		},
 		{
