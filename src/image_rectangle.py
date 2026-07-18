@@ -133,55 +133,89 @@ def create_led_rectangle_image(data_file: str, output_file: str, scale_factor: i
     else:
         print(f"Rectangle image saved to {unique_output_file} (scaled {scale_factor}x, size: {rect_img.size[0]}x{rect_img.size[1]})")
 
-def find_dat_files_grouped(directory):
-    """Find all .dat files grouped by subdirectory"""
+def _group_name_for_path(relative_path):
+    """Build a deterministic group name for a path relative to the input directory."""
+    if relative_path == '.':
+        return 'root'
+    return relative_path.replace('\\', '/').replace('/', '_')
+
+
+def _group_files_by_size(files, group_size=10):
+    """Split a flat list of files into sequential numbered groups."""
+    if group_size <= 0:
+        raise ValueError("group_size must be positive")
+
     groups = {}
+    for index, file_path in enumerate(sorted(files)):
+        group_index = index // group_size
+        group_name = str(group_index).zfill(2)
+        groups.setdefault(group_name, []).append(file_path)
+    return groups
+
+
+def find_dat_files_grouped(directory, group_size=10):
+    """Find all .dat files grouped by subdirectory or split into fixed-size groups for flat directories."""
+    groups = {}
+    flat_files = []
+
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith('.dat'):
-                # Get relative path from the input directory
-                rel_path = os.path.relpath(root, directory)
-                if rel_path == '.':
-                    group_name = 'root'
-                else:
-                    group_name = rel_path.replace('\\', '/').replace('/', '_')
-                
-                if group_name not in groups:
-                    groups[group_name] = []
-                groups[group_name].append(os.path.join(root, file))
-    
-    # Sort files within each group
-    for group in groups:
-        groups[group] = sorted(groups[group])
-    
-    return groups
+                flat_files.append(os.path.join(root, file))
 
-def find_image_files_grouped(directory):
-    """Find all image files grouped by subdirectory"""
+    if not flat_files:
+        return groups
+
+    has_nested_dirs = any(
+        os.path.relpath(root, directory) != '.' for root, _, _ in os.walk(directory)
+    )
+    if has_nested_dirs:
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.endswith('.dat'):
+                    rel_path = os.path.relpath(root, directory)
+                    group_name = _group_name_for_path(rel_path)
+                    groups.setdefault(group_name, []).append(os.path.join(root, file))
+        for group in groups:
+            groups[group] = sorted(groups[group])
+        return groups
+
+    return _group_files_by_size(flat_files, group_size)
+
+
+def find_image_files_grouped(directory, group_size=10):
+    """Find all image files grouped by subdirectory or split into fixed-size groups for flat directories."""
     # Supported image extensions
     image_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff', '.webp'}
-    
+
     groups = {}
+    flat_files = []
+
     for root, dirs, files in os.walk(directory):
         for file in files:
             file_lower = file.lower()
             if any(file_lower.endswith(ext) for ext in image_extensions):
-                # Get relative path from the input directory
-                rel_path = os.path.relpath(root, directory)
-                if rel_path == '.':
-                    group_name = 'root'
-                else:
-                    group_name = rel_path.replace('\\', '/').replace('/', '_')
-                
-                if group_name not in groups:
-                    groups[group_name] = []
-                groups[group_name].append(os.path.join(root, file))
-    
-    # Sort files within each group
-    for group in groups:
-        groups[group] = sorted(groups[group])
-    
-    return groups
+                flat_files.append(os.path.join(root, file))
+
+    if not flat_files:
+        return groups
+
+    has_nested_dirs = any(
+        os.path.relpath(root, directory) != '.' for root, _, _ in os.walk(directory)
+    )
+    if has_nested_dirs:
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                file_lower = file.lower()
+                if any(file_lower.endswith(ext) for ext in image_extensions):
+                    rel_path = os.path.relpath(root, directory)
+                    group_name = _group_name_for_path(rel_path)
+                    groups.setdefault(group_name, []).append(os.path.join(root, file))
+        for group in groups:
+            groups[group] = sorted(groups[group])
+        return groups
+
+    return _group_files_by_size(flat_files, group_size)
 
 def detect_file_type(directory):
     """Detect whether directory contains .dat files or image files"""
