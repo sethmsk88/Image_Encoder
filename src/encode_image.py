@@ -22,8 +22,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Encode images to .dat format for LED displays (supports JPG, JPEG, PNG, BMP, GIF, TIFF, WEBP)')
     parser.add_argument('input_dir', nargs='?', default='images/', 
                         help='Input directory containing image files (default: images/)')
-    parser.add_argument('--output-dir', default='img_data/', 
+    parser.add_argument('--output-dir', default='img_data/',
                         help='Output directory for encoded data files (default: img_data/)')
+    parser.add_argument('--flat', action='store_true',
+                        help='Group images by a fixed chunk size (10 per group) instead of by '
+                             'source subfolder. Use for flat input directories with no subfolders.')
     args = parser.parse_args()
 
     # Calculate gamma correction table, makes mid-range colors look 'right':
@@ -81,9 +84,8 @@ if __name__ == "__main__":
     print(f"Supported formats: {', '.join(sorted(supported_extensions))}")
     print()
 
-    group_dir_num = -1
-    img_group_size = 10  # this number of images will be in each group/directory
     img_i = 0
+    img_group_size = 10  # only used in --flat mode
 
     # Recursively find all supported image files
     supported_files = []
@@ -112,22 +114,33 @@ if __name__ == "__main__":
     print(f"Found {len(supported_files)} supported image file(s) to process (including subdirectories)...")
     print()
 
+    # Assign each image to a two-digit-numbered output group. In --flat mode,
+    # groups are fixed-size chunks; otherwise each source subfolder (the first
+    # path component of relative_path) becomes its own group, in the order it
+    # is first encountered (which alphanum_key sorting makes "0", "1", "2", ...).
+    group_key_to_num = {}
+
+    def group_num_for(index, relative_path):
+        if args.flat:
+            return index // img_group_size
+        key = relative_path.split(os.sep)[0] if os.sep in relative_path else ''
+        if key not in group_key_to_num:
+            group_key_to_num[key] = len(group_key_to_num)
+        return group_key_to_num[key]
+
     for relative_path, full_path in supported_files:
 
-        # create a group directory if img_group_size has been reached
-        if img_i % img_group_size == 0:
-            group_dir_num += 1
-            group_dir_name = str(group_dir_num).zfill(2)  # Zero-pad to 2 digits
-            group_dir_path = os.path.join(img_data_dir_path, group_dir_name)
-            os.makedirs(group_dir_path, exist_ok=True)
+        group_dir_name = str(group_num_for(img_i, relative_path)).zfill(2)
+        out_dir = os.path.join(img_data_dir_path, group_dir_name)
+        os.makedirs(out_dir, exist_ok=True)
 
-        group_dir_name = str(group_dir_num).zfill(2)  # Zero-pad to 2 digits
-        mapping = group_dir_name + "/" + str(img_i).zfill(4) + ".dat" + " ==> " + relative_path
+        dat_filename = str(img_i).zfill(4) + ".dat"
+        mapping = f"{group_dir_name}/{dat_filename} ==> {relative_path.replace(chr(92), '/')}"
         map_file.write(mapping + "\n")
         print(mapping)
 
         # Create data file for this image
-        dat_file_path = os.path.join(img_data_dir_path, group_dir_name, str(img_i).zfill(4) + ".dat")
+        dat_file_path = os.path.join(out_dir, dat_filename)
         out_file = open(dat_file_path, 'w')
 
         # Load image in RGB format and get dimensions:
