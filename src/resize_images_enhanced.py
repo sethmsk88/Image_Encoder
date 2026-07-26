@@ -1,7 +1,6 @@
 import os
 import json
 import argparse
-from datetime import datetime
 import PIL.Image as Image
 from PIL import ImageEnhance, ImageFilter
 import numpy as np
@@ -16,40 +15,6 @@ def create_directory_if_not_exists(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
         print(f"Created directory: {directory}")
-
-
-def get_unique_filename(filepath):
-    """
-    Generate a unique filename by adding timestamp if file already exists
-
-    Args:
-        filepath: Original file path
-
-    Returns:
-        str: Unique file path that doesn't exist yet
-    """
-    if not os.path.exists(filepath):
-        return filepath
-
-    # File exists, add timestamp
-    directory = os.path.dirname(filepath)
-    filename = os.path.basename(filepath)
-    name, ext = os.path.splitext(filename)
-
-    # Generate timestamp string (time only, no date)
-    timestamp = datetime.now().strftime("%H%M%S")
-
-    # Create new filename with timestamp
-    new_filename = f"{name}_{timestamp}{ext}"
-    new_filepath = os.path.join(directory, new_filename)
-
-    # If somehow this still exists (unlikely), add milliseconds
-    if os.path.exists(new_filepath):
-        timestamp_ms = datetime.now().strftime("%H%M%S_%f")[:-3]  # Remove last 3 digits for milliseconds
-        new_filename = f"{name}_{timestamp_ms}{ext}"
-        new_filepath = os.path.join(directory, new_filename)
-
-    return new_filepath
 
 
 def load_enhancement_settings(settings_file=None):
@@ -80,6 +45,8 @@ def load_enhancement_settings(settings_file=None):
                 if filename.startswith("enhancement_") and filename.endswith(".json"):
                     # Extract the preset name (e.g., "dramatic" from "enhancement_dramatic.json")
                     preset_name = filename[12:-5]  # Remove "enhancement_" prefix and ".json" suffix
+                    if not preset_name or preset_name.lower() == "settings":
+                        preset_name = None
                 else:
                     preset_name = None
 
@@ -192,7 +159,7 @@ def apply_unsharp_mask(img, radius=1.0, percent=150, threshold=3):
     return Image.fromarray(sharpened)
 
 
-def resize_images_enhanced(settings_file=None, input_dir=None, target_height=24):
+def resize_images_enhanced(settings_file=None, input_dir=None, target_height=24, output_dir=None):
     """
     Resize all images in specified directory to the target height with quality enhancements
     and save them to images/processed/<height>px directory.
@@ -201,6 +168,7 @@ def resize_images_enhanced(settings_file=None, input_dir=None, target_height=24)
         settings_file: Path to the JSON file containing enhancement settings
         input_dir: Path to the directory containing source images (default: images/originals)
         target_height: Target output height in pixels
+        output_dir: Path to the directory to save resized images (default: images/processed/<height>px)
     """
     # Define directories relative to project root
     if input_dir is None:
@@ -212,7 +180,10 @@ def resize_images_enhanced(settings_file=None, input_dir=None, target_height=24)
         else:
             source_dir = input_dir
 
-    output_dir = os.path.join(PROJECT_ROOT, "images", "processed", f"{target_height}px")
+    if not output_dir:
+        output_dir = os.path.join(PROJECT_ROOT, "images", "processed", f"{target_height}px")
+    elif not os.path.isabs(output_dir):
+        output_dir = os.path.join(PROJECT_ROOT, output_dir)
 
     # Load enhancement settings from file
     file_settings, preset_name = load_enhancement_settings(settings_file)
@@ -285,8 +256,8 @@ def resize_images_enhanced(settings_file=None, input_dir=None, target_height=24)
             new_width = int(float(orig_width) * float(target_height) / float(orig_height))
             new_size = (new_width, target_height)
 
-            # Resize image using high-quality Lanczos resampling (better than bicubic for downsampling)
-            resized_img = img.resize(new_size, Image.LANCZOS)
+            # Resize image using nearest-neighbor interpolation
+            resized_img = img.resize(new_size, Image.NEAREST)
 
             # Apply enhancements to combat washed-out appearance
             print(f"Enhancing {rel_path}...")
@@ -317,30 +288,20 @@ def resize_images_enhanced(settings_file=None, input_dir=None, target_height=24)
             name, ext = os.path.splitext(filename)
 
             # Include target height and preset name in filename if available
-            if preset_name:
+            if preset_name and preset_name.lower() != "settings":
                 output_filename = f"{name}_{target_height}px_{preset_name}{ext}"
             else:
                 output_filename = f"{name}_{target_height}px{ext}"
 
             output_path = os.path.join(output_dir, output_filename)
 
-            # Get unique output path to prevent overwriting
-            unique_output_path = get_unique_filename(output_path)
-
-            # Save the enhanced resized image
+            # Save the enhanced resized image (overwrites if it already exists)
             save_kwargs = {}
             if ext.lower() in [".jpg", ".jpeg"]:
                 save_kwargs["quality"] = 95
-            enhanced_img.save(unique_output_path, **save_kwargs)
+            enhanced_img.save(output_path, **save_kwargs)
 
-            # Show appropriate message
-            if unique_output_path != output_path:
-                print(
-                    f"✓ {rel_path} ({orig_width}x{orig_height}) → "
-                    f"{os.path.basename(unique_output_path)} ({new_width}x{target_height}) [timestamped]"
-                )
-            else:
-                print(f"✓ {rel_path} ({orig_width}x{orig_height}) → {output_filename} ({new_width}x{target_height})")
+            print(f"✓ {rel_path} ({orig_width}x{orig_height}) → {output_filename} ({new_width}x{target_height})")
             processed_count += 1
 
         except Exception as e:
@@ -357,13 +318,14 @@ def resize_images_enhanced(settings_file=None, input_dir=None, target_height=24)
     return processed_count > 0
 
 
-def resize_images_basic(input_dir=None, target_height=24):
+def resize_images_basic(input_dir=None, target_height=24, output_dir=None):
     """
     Original basic resize function without enhancements (for comparison)
 
     Args:
         input_dir: Path to the directory containing source images (default: images/originals)
         target_height: Target output height in pixels
+        output_dir: Path to the directory to save resized images (default: images/processed/<height>px)
     """
     # Define directories relative to project root
     if input_dir is None:
@@ -375,7 +337,10 @@ def resize_images_basic(input_dir=None, target_height=24):
         else:
             source_dir = input_dir
 
-    output_dir = os.path.join(PROJECT_ROOT, "images", "processed", f"{target_height}px")
+    if not output_dir:
+        output_dir = os.path.join(PROJECT_ROOT, "images", "processed", f"{target_height}px")
+    elif not os.path.isabs(output_dir):
+        output_dir = os.path.join(PROJECT_ROOT, output_dir)
 
     # Check if source directory exists
     if not os.path.exists(source_dir):
@@ -424,8 +389,8 @@ def resize_images_basic(input_dir=None, target_height=24):
             new_width = int(float(orig_width) * float(target_height) / float(orig_height))
             new_size = (new_width, target_height)
 
-            # Resize image using high-quality bicubic interpolation
-            resized_img = img.resize(new_size, Image.BICUBIC)
+            # Resize image using nearest-neighbor interpolation
+            resized_img = img.resize(new_size, Image.NEAREST)
 
             # Generate output filename (flatten subdirectory structure)
             filename = os.path.basename(rel_path)
@@ -433,20 +398,10 @@ def resize_images_basic(input_dir=None, target_height=24):
             output_filename = f"{name}_{target_height}px{ext}"
             output_path = os.path.join(output_dir, output_filename)
 
-            # Get unique output path to prevent overwriting
-            unique_output_path = get_unique_filename(output_path)
+            # Save the resized image (overwrites if it already exists)
+            resized_img.save(output_path)
 
-            # Save the resized image
-            resized_img.save(unique_output_path)
-
-            # Show appropriate message
-            if unique_output_path != output_path:
-                print(
-                    f"✓ {rel_path} ({orig_width}x{orig_height}) → "
-                    f"{os.path.basename(unique_output_path)} ({new_width}x{target_height}) [timestamped]"
-                )
-            else:
-                print(f"✓ {rel_path} ({orig_width}x{orig_height}) → {output_filename} ({new_width}x{target_height})")
+            print(f"✓ {rel_path} ({orig_width}x{orig_height}) → {output_filename} ({new_width}x{target_height})")
             processed_count += 1
 
         except Exception as e:
@@ -484,6 +439,7 @@ Examples:
   python resize_images_enhanced.py --height 32                     # Resize to 32px tall
   python resize_images_enhanced.py --settings custom.json          # Use custom settings file
   python resize_images_enhanced.py --enhanced --input my_images/   # Process custom directory
+  python resize_images_enhanced.py --enhanced --output out/        # Save to custom directory
 
 Enhancement settings are loaded from 'config/enhancement_settings.json'.
 Edit this file to customize enhancement parameters.
@@ -529,6 +485,14 @@ Source images are read from 'images/originals' by default.
         help="Path to directory containing source images (default: images/originals)",
     )
 
+    # Output directory argument
+    parser.add_argument(
+        "--output",
+        "--output-dir",
+        default=None,
+        help="Path to directory to save resized images (default: images/processed/<height>px)",
+    )
+
     # Target height argument
     parser.add_argument(
         "--height",
@@ -552,10 +516,10 @@ if __name__ == "__main__":
     # Determine processing mode
     if args.enhanced:
         print("\nUsing enhanced processing mode...")
-        success = resize_images_enhanced(args.settings, args.input, args.height)
+        success = resize_images_enhanced(args.settings, args.input, args.height, args.output)
     elif args.basic:
         print("\nUsing basic processing mode...")
-        success = resize_images_basic(args.input, args.height)
+        success = resize_images_basic(args.input, args.height, args.output)
     else:
         # Interactive mode (default when no arguments provided)
         while True:
@@ -568,11 +532,11 @@ if __name__ == "__main__":
 
             if choice == "1":
                 print("\nUsing enhanced processing mode...")
-                success = resize_images_enhanced(args.settings, args.input, args.height)
+                success = resize_images_enhanced(args.settings, args.input, args.height, args.output)
                 break
             elif choice == "2":
                 print("\nUsing basic processing mode...")
-                success = resize_images_basic(args.input, args.height)
+                success = resize_images_basic(args.input, args.height, args.output)
                 break
             else:
                 print("Invalid choice. Please enter 1 or 2.")

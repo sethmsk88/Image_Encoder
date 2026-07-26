@@ -5,7 +5,7 @@
 			"label": "Resize Images (Enhanced)",
 			"type": "shell",
 			"command": "${workspaceFolder}/.venv/Scripts/python.exe",
-			"args": ["src/resize_images_enhanced.py", "--enhanced", "--input", "${input:sourceDirectory}", "--height", "${input:targetHeight}"],
+			"args": ["src/resize_images_enhanced.py", "--enhanced", "--input", "${input:sourceDirectory}", "--output", "${input:outputDirectory}", "--height", "${input:targetHeight}"],
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build",
@@ -308,6 +308,12 @@
 			"id": "targetHeight",
 			"description": "Target output height in pixels",
 			"default": "24",
+			"type": "promptString"
+		},
+		{
+			"id": "outputDirectory",
+			"description": "Path to directory to save resized images (leave blank for default: images/processed/<height>px)",
+			"default": "",
 			"type": "promptString"
 		},
 		{
